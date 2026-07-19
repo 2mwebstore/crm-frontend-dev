@@ -113,7 +113,12 @@ async function handleFaceIdLogin() {
     if (e?.name === 'NotAllowedError') {
       error.value = 'Face ID / passkey prompt was cancelled'
     } else {
-      error.value = e?.error || 'Face ID / passkey login failed'
+      // Surface whatever the actual error was — either the backend's
+      // own error message (e.error) or a browser-side DOMException
+      // (e.name/e.message) — rather than a generic fallback that made
+      // every failure look identical and impossible to diagnose.
+      const detail = e?.error || e?.message || (e?.name ? `${e.name}` : null) || JSON.stringify(e)
+      error.value = `Face ID / passkey login failed — ${detail}`
     }
   } finally {
     faceIdLoading.value = false
