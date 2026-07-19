@@ -91,7 +91,16 @@ async function registerDevice() {
     if (e?.name === 'NotAllowedError') {
       error('Registration was cancelled')
     } else {
-      error(e?.error || 'Failed to register this device')
+      // Surface whatever the actual error was — a DOMException from the
+      // browser's own WebAuthn API (e.name/e.message, e.g.
+      // "SecurityError: The relying party ID is not a registrable
+      // domain suffix of, nor equal to the current domain"), or the
+      // backend's own error message (e.error) if the failure happened
+      // server-side during /register/finish instead. Showing the
+      // generic fallback made every failure look identical and
+      // impossible to diagnose from the UI alone.
+      const detail = e?.error || e?.message || (e?.name ? `${e.name}` : null) || JSON.stringify(e)
+      error(`Failed to register this device — ${detail}`)
     }
   } finally {
     registering.value = false
