@@ -27,12 +27,16 @@ let sessionExpiredHandled = false
 api.interceptors.response.use(
   res => res.data,
   err => {
-    // A 401 from the login endpoint itself just means "wrong credentials"
-    // — that should surface as an inline error on the login form, not
-    // trigger a full page reload. Only an authenticated request getting
-    // rejected (an actual expired/invalid session) should force a
-    // logout-redirect.
-    const isLoginRequest = err.config?.url?.includes('/auth/login')
+    // A 401 from a login endpoint itself just means "invalid
+    // credentials"/"verification failed" — that should surface as an
+    // inline error on the login form, not trigger a full page reload.
+    // Only an authenticated request getting rejected (an actual
+    // expired/invalid session) should force a logout-redirect. This
+    // covers password login AND both WebAuthn (Face ID/passkey) login
+    // endpoints — missing the WebAuthn ones here was exactly what caused
+    // a failed Face ID attempt to force-reload the login page instead of
+    // showing an inline error.
+    const isLoginRequest = /\/auth\/login|\/webauthn\/login\//.test(err.config?.url || '')
     if (err.response?.status === 401 && !isLoginRequest && !sessionExpiredHandled) {
       sessionExpiredHandled = true
       localStorage.removeItem('crm_token')

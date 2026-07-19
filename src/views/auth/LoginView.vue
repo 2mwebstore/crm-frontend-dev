@@ -42,7 +42,7 @@
         <!-- Face ID / Passkey login — needs an email typed above first,
              since the server looks up which credentials to check against
              by email, same as the first step of password login. -->
-        <div class="mt-3">
+        <div v-if="webAuthnSupported" class="mt-3">
           <button
             type="button"
             @click="handleFaceIdLogin"
@@ -66,14 +66,12 @@ import { useRouter } from 'vue-router'
 import { EyeIcon, EyeSlashIcon, FaceSmileIcon } from '@heroicons/vue/24/outline'
 import { useAuthStore } from '@/stores/auth'
 import { useLookupStore } from '@/stores/lookup'
-import { useToast } from '@/composables/useToast'
 import { beginWebAuthnLogin, finishWebAuthnLogin } from '@/api/webauthn'
 import { isWebAuthnSupported, getCredential } from '@/utils/webauthn'
 
 const auth = useAuthStore()
 const lookup = useLookupStore()
 const router = useRouter()
-const { error: toastError } = useToast()
 
 const form = ref({ email: '', password: '' })
 const loading = ref(false)
