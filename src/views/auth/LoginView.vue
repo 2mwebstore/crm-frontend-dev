@@ -101,9 +101,9 @@ async function handleFaceIdLogin() {
   error.value = ''
   try {
     const begin = await beginWebAuthnLogin(form.value.email)
-    const credentialResponse = await getCredential(begin.options)
-    const finish = await finishWebAuthnLogin(begin.session_key, credentialResponse)
-    await auth.setSession(finish.token, finish.user)
+    const credentialResponse = await getCredential(begin.data.options)
+    const finish = await finishWebAuthnLogin(begin.data.session_key, credentialResponse)
+    await auth.setSession(finish.data.token, finish.data.user)
     await lookup.loadAll()
     router.push('/dashboard')
   } catch (e) {

@@ -71,7 +71,7 @@ async function load() {
   loading.value = true
   try {
     const res = await getWebAuthnCredentials()
-    credentials.value = res || []
+    credentials.value = res.data || []
   } catch { credentials.value = [] } finally { loading.value = false }
 }
 
@@ -79,12 +79,12 @@ async function registerDevice() {
   registering.value = true
   try {
     const begin = await beginWebAuthnRegistration()
-    const credentialResponse = await createCredential(begin.options)
+    const credentialResponse = await createCredential(begin.data.options)
     // A simple default name based on the browser's own platform string —
     // good enough to tell devices apart in the list without asking the
     // user to type one during the ceremony itself.
     const defaultName = navigator.userAgentData?.platform || navigator.platform || 'This device'
-    await finishWebAuthnRegistration(begin.session_key, defaultName, credentialResponse)
+    await finishWebAuthnRegistration(begin.data.session_key, defaultName, credentialResponse)
     success('Device registered')
     await load()
   } catch (e) {
